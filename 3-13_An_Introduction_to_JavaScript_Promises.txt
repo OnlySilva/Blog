@@ -1,0 +1,73 @@
+介绍
+js promises是js对象，用来更清晰简明的写和读取异步js代码。它遵从'Promisea/A+'编程规范，这个规范被ES6和其他库支持。
+一个常规的js方案会从外部资源中获取数据，比如API，然后根据返回的数据做一些事。这通常由发送一个异步请求来完成。由于你的其他代码在请求期间继续执行，所以处理外部回复会变得困难。通常我们会使用回调函数来解决这件事。
+$.get('/api/v1/songs', data => {
+    // <code to handle data here>
+});
+然而，如果处理数据的代码又要做一个异步请求时，这一堆回调函数会变得很麻烦。想象一下这样一个场景：一个网络请求的结果需要传递给另一个网络请求，而这个网络请求同样需要传递给另一个网络请求。最后的代码看起来就像回调内嵌套着回调。
+$.get('/api/v1/songs', songs => {
+    $.post('/api/v1/playlists/', {songs}, playlist => {
+        // <code to handle second callback here>
+    });
+});
+介绍jsPromises
+对于写异步代码，js promises相对于嵌套的回调提供了更可读的选择。一个promise是一个最终解决或拒绝的对象，预示着这个执行的成败。你可以将句柄绑定到promise上，这个句柄允许你处理返回值。
+有三种状态可以绑定到js promise：pending、fulfiled和rejected。每个promise在被建立时都以pending开始，最终已fulfilled或rejected结尾。
+当一个promise被fulfilled了，它将返回一个值。当一个promise被rejected时，会有一个原因。返回值和失败原因都可以通过绑定一个then方法来获取。
+js promises和then方法
+then方法允许你传递一个完成或拒绝句柄。
+继续我们的例子，我们将建立一个使用RSVP库的初始promise：
+$.get('/api/v1/songs', songs => {
+    $.post('/api/v1/playlists/', {songs}, playlist => {
+        // <code to handle second callback here>
+    });
+});
+用js promise连接这些then
+因为每个then都会返回一个promise，很容易将他们连接起来。当一个指定的then函数返回一个值时，可以将这个值传递给链子中的下一个then作为完成值。如果一个指定的then抛出一个错误，这个错误传递给链子中的下一个then作为拒绝值。
+如果一个指定的then句柄没有前一个promise的完成类型，它将被忽略，然后继续传递给下一个链子中拥有合适句柄的then。
+myPromise.then(fulfillmentHandler).then(null, rejectionHandler);
+在上面的例子中，如果起始promise拒绝了，那么解决值将传递给第二个then，因为第一个then没有拒绝句柄。
+当你只在意操作拒绝值时，有一个简写方式，叫做catch
+myPromise.catch(rejectionHandler);
+js promises中特殊的方法
+js promises也有一些特殊的方法来处理大量异步请求的结果，比如说等到多个异步请求都完成。
+Promise.all([promise1,promise2,promise3]).then(allFulfilled, firstRejected);
+allFulfilled 处理所有promises都完成的情况，firstRejected处理至少一个promises被拒绝的情况。
+如果你有一系列的异步请求并且只想处理第一个建立的，你可以这么做
+Promise.race([promise1,promise2,promise3]).then(fulfillmentHandler, rejectionHandler);
+抛出js promises
+通过使用promise.cast方法你可以将任何值转换为一个promise
+Promise.cast('some value').then(onFulfilled, onRejected);
+一个常规的用法是把一个没有官方promise声明的jquery请求转变为一个promise。这是相当重要的，因为一个jquery请求并不会返回一个promise，这样的话就不可能将他们连在一起。
+Promise.cast($.ajax(config))).then(onFulfilled, onRejected);
+创造一个js promise
+promise构造函数需要两个参数：fulfill和reject,这两个参数已经被promise API所定义。
+var myPromise = new RSVP.Promise((fulfill, reject) => {
+  var response = getProfileWithCredentials('12kasd');
+  if (response.success) {
+    fulfill(response.profileData);
+  } else {
+    reject(response.errorMessage);
+  }
+});
+
+myPromise.then(profileData => {
+ console.log('profile information: ', profileData);
+}).catch((errorMessage) => {
+ console.log(errorMessage);
+});
+then方法中的this
+需要注意的一件事是在es5语法中，所有then方法中的this都是undefined，所以如果你想用this来指代初始环境，记得传递正确的上下文给你的then函数。你可以用bind方法达到这个目的：
+this.get('name');  // 'Yanik' 
+
+getJSON('/items').then(function(items){ 
+    return this.get('name');
+}  //returns undefined when not using bind
+
+getJSON('/items').then(function(items){ 
+    return this.get('name'); 
+}.bind(this))  // returns 'Yanik' when using bind
+closing思想
+ptomises提供了一个灵活的API来定义异步事件中的代码流。此外说明书也提供了许多帮助方法来控制操作多异步请求，也提供了把数值转变为promise的能力。用了以上的技术，promises可以帮助你用更加易写和可读的方法写异步代码。
+感谢。。。
+来源：http://dev.paperlesspost.com/introduction-javascript-promises/205
