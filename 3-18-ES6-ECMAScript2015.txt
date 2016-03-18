@@ -1,0 +1,167 @@
+ES6是什么？
+ECMAScript(js)规范发布的第6版
+——也被成为ES6、Harmony、EES2015、ECMAScript 6
+——现行js的第一个新标准
+——ECMAScript2016(ES7)应该会在6月定稿
+——自从2009年以来第一个修改ECMA语言标准的
+
+ES6中会有多少变化？
+ECMA现行标准的目的是没年对定稿的语言特性做一次发布，这些发布要比ES6中的变化小得多，毕竟ES6代表了6年的标准。
+
+那么ES6有什么新的东西？
+es6给js语言语法增加了许多新的特性，我们将一些新特性列举在下面，其中的大多数都可以通过Babel进行使用。
+-箭头函数
+-词法this
+-块作用域(let和const)
+-类
+-模型
+-函数默认参数、rest和扩展
+-iterator和for..of
+-生成器Generators
+-充分的unicode支持
+-map、set、weakmap、weakset
+-代理
+-Subclassable Builtins
+-promises
+字符串提升
+-数组提升
+-更多
+
+箭头函数
+使用箭头函数和用传统方式定义一个函数的唯一区别就是箭头函数将共享被定义的作用域，他们可以获取定义的地方的所有局部变量，箭头函数内部的this代表他被定义的作用域，即this不会随着使用该函数对象的变化而变化。
+-与java和c#非常类似的语法
+() => {}
+(arg1) => {}
+x => {}
+x => statement
+-语法糖和缩写
+function(){}
+let a = [
+			  "Hydrogen",
+			  "Helium",
+			  "Lithium",
+			  "Beryl­lium"
+			];
+			
+			//ES5
+			var a2 = a.map(function(s){ return s.length });
+			
+			//ES6
+			let a3 = a.map( s => s.length );
+
+词法this
+这个和类与箭头函数一起来this关键字有更多直观上的使用。
+类内部的this指代类
+对象内部的this指代对象
+箭头函数内部的this指代定义的上下文
+
+类
+用类来提供一种简单的方法来展现原型的继承，并让代码变得更加清晰
+-和java等其他语言类似
+-用class关键字定义
+-能扩展另一个类
+-有一个构造函数、static or instance variables or functions
+class Polygon {
+			  constructor(height, width) {
+			    this.height = height;
+			    this.width = width;
+			  }
+			}
+
+let和const
+这可能是最大的变化了，它让你完全代替var关键字，要么用let表示正常的变量。要么用const表示只读的变量。一种正在出现的最好的实践就是停止使用var，改用let和const，因为这样作用域变得更简单了。
+-代替var
+-let 新的var;块作用域变量；
+-const 只能赋值；只读；赋值之前不能使用
+
+Generators
+生成器允许你在一个函数里面写一个迭代程序，这个程序可以维持迭代器上面的状态，举个例子：
+function* idMaker(){
+			  let index = 0;
+			  while(true)
+			    yield index++;
+			}
+			
+			let gen = idMaker();
+			
+			console.log(gen.next().value); // 0
+			console.log(gen.next().value); // 1
+			console.log(gen.next().value); // 2
+			// ...	
+-yielding函数
+-用 function*()形式定义
+-必须以一个包含yield的声明代替返回值
+-非常适于在迭代器上创造连续的数列或者做计算
+
+modules
+js模块和类是不同的概念，因为一个模块可以包含一个或者更多的类，这些类可能会被输出，有可能不会。
+-允许引入其他js文件或者其中一部分
+-允许一个js文件的接口作为输出
+-由他们所在的文件定义，一个文件中不能有2个模块
+例子
+// Inside module.js
+			export class Polygon {
+			  constructor(height, width) {
+			    this.height = height;
+			    this.width = width;
+			  }
+			}
+			
+			export function something(){
+				//...
+			}
+//Imports only the polygon class
+			import { Polygon } from "module.js";
+
+析构
+这个包含了关于变量赋值的使用和处理的相关提升。这些提升允许你建立更多的自我描述的弹性的方法。
+
+默认参数
+如果函数的使用者没有提供参数的话，默认参数可以让你有个默认值可以使用。
+function test(required, controls = {}, name = "test", value = 4){ /*...*/ }
+
+Rest Arguments
+这允许函数传入任何数量的参数，并把这些参数融合到一个数组之中，这意味着你不再需要在函数内部使用arguments数组。注意到函数只能有一个rest参数，并且必须是最后一个。
+function test( a, b, ...c){
+				console.log(c.length);
+				return (a + b) * c.length;
+			}
+
+扩展操作
+这个和rest参数类似,但只用来数组赋值
+let b = [ "bob", "jones" ];
+			let a = [ 1, 2, ...b ]; // [ 1, 2, "bob", "jones"]
+
+for循环
+for循环可以使用新的for...of循环，这允许你迭代一个数组或者迭代器并把他们赋值给一个局部变量。
+//Take advantage of destructuring to map two variables from a key value pair
+			for (let [name, builder] of Object.entries(models))
+			
+			//Basic for of loop
+			for (let x of array)
+
+字符串提升
+字符串现在有字面模版，移除了模板库像handlebars的需求，多行函数也可以使用。为了使用字符串中的新特性，你需要用反勾号定义你的字符串。
+-字面量模版
+-插写${identity}
+-string,raw解决插写
+let customer = `Bob`;
+			let welcome = `Welcome ${customer}`;
+			
+			let rawString = String.raw(welcome); // Welcome Bob
+
+今天我们怎么用ES6
+需要一个转义器来使用ES6，我推荐使用Babel因为它完全遵照ECMAScript标准，可以用现在的标准语法来支持新的标准。Babel通用可以让你使用一个config文件来enable或者disablet ranspilation transformations，这个config文件意味着由于浏览器开始支持ES6的更多特性，你就不需要使用数量越来越多的转义器，并从本地执行获益。
+使用Babel的最好方法是把它集成到你的工程之中，你可以使用gulp-babel插件。同样也有其他插件。
+其他转义器
+-Typescript
+-Tracur
+
+为什么使用Babel
+-聚焦 ES6标准
+-当浏览器表明本地支持时转换器可以变得可用或者不可用
+-来说支持ES7标准
+
+想学更多？
+
+来源：http://xarnze.com/article/ES6,%20ECMAScript2015
